@@ -1,7 +1,8 @@
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.parsers import MultiPartParser, FormParser
 from .models import ChatMessage
 from .serializers import ChatMessageSerializer
 from django.contrib.auth import get_user_model
@@ -42,17 +43,32 @@ def get_messages(request, user_id):
 # Send personal messages
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser, FormParser])
 def send_message(request):
-    """Send a message to another user"""
+    """Send a message with optional media to another user"""
     sender = request.user
     receiver_id = request.data.get("receiver")
-    message_text = request.data.get("message")
+    message_text = request.data.get("message", "")
+    media_file = request.FILES.get("media_file")
+    media_type = request.data.get("media_type")
 
     try:
         receiver = User.objects.get(id=receiver_id)
-        message = ChatMessage.objects.create(
-            sender=sender, receiver=receiver, message=message_text
+        
+        message = ChatMessage(
+            sender=sender, 
+            receiver=receiver, 
+            message=message_text
         )
+        
+        # Handle media file if present
+        if media_file:
+            message.media_file = media_file
+            message.media_type = media_type
+            message.media_content_type = media_file.content_type
+        
+        message.save()
+        
         return Response(
             ChatMessageSerializer(message).data, status=status.HTTP_201_CREATED
         )
@@ -152,17 +168,32 @@ def get_user_groups(request):
 # Send message in group
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser, FormParser])
 def send_group_message(request):
-    """Send a message in a group chat"""
+    """Send a message with optional media in a group chat"""
     sender = request.user
     group_id = request.data.get("group")
-    message_text = request.data.get("message")
+    message_text = request.data.get("message", "")
+    media_file = request.FILES.get("media_file")
+    media_type = request.data.get("media_type")
 
     try:
         group = GroupChat.objects.get(id=group_id, members=sender)
-        message = GroupMessage.objects.create(
-            group=group, sender=sender, message=message_text
+        
+        message = GroupMessage(
+            group=group, 
+            sender=sender, 
+            message=message_text
         )
+        
+        # Handle media file if present
+        if media_file:
+            message.media_file = media_file
+            message.media_type = media_type
+            message.media_content_type = media_file.content_type
+        
+        message.save()
+        
         return Response(
             GroupMessageSerializer(message).data, status=status.HTTP_201_CREATED
         )

@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from .models import ChatMessage
-from .models import GroupChat, GroupMessage
+from .models import ChatMessage, GroupChat, GroupMessage
 from django.contrib.auth import get_user_model
+import cloudinary.uploader
 
 User = get_user_model()
 
@@ -9,6 +9,7 @@ User = get_user_model()
 class ChatMessageSerializer(serializers.ModelSerializer):
     sender_username = serializers.ReadOnlyField(source="sender.username")
     receiver_username = serializers.ReadOnlyField(source="receiver.username")
+    media_url = serializers.SerializerMethodField()
 
     class Meta:
         model = ChatMessage
@@ -20,14 +21,20 @@ class ChatMessageSerializer(serializers.ModelSerializer):
             "timestamp",
             "sender_username",
             "receiver_username",
+            "media_file",
+            "media_type",
+            "media_content_type",
+            "media_url",
         ]
+    
+    def get_media_url(self, obj):
+        if obj.media_file:
+            return obj.media_file.url
+        return None
 
 
 class GroupChatSerializer(serializers.ModelSerializer):
-    # Use Nested Serializer to include the usernames of members instead of just IDs
-    members = serializers.StringRelatedField(
-        many=True
-    )  # This will display the usernames of the members
+    members = serializers.StringRelatedField(many=True)
 
     class Meta:
         model = GroupChat
@@ -35,9 +42,8 @@ class GroupChatSerializer(serializers.ModelSerializer):
 
 
 class GroupMessageSerializer(serializers.ModelSerializer):
-    fullname = serializers.CharField(
-        source="sender.get_full_name"
-    )  # Include the sender's username
+    fullname = serializers.CharField(source="sender.get_full_name")
+    media_url = serializers.SerializerMethodField()
 
     class Meta:
         model = GroupMessage
@@ -46,4 +52,13 @@ class GroupMessageSerializer(serializers.ModelSerializer):
             "message",
             "timestamp",
             "fullname",
-        ]  # Add the username field to the response
+            "media_file",
+            "media_type",
+            "media_content_type",
+            "media_url",
+        ]
+    
+    def get_media_url(self, obj):
+        if obj.media_file:
+            return obj.media_file.url
+        return None
