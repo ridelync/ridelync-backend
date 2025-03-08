@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from .serializers import RideSerializer
 from django.contrib.auth import get_user_model
-from .models import Available, Booking
+from .models import Available, Booking, Rating
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.shortcuts import get_object_or_404
@@ -12,6 +12,11 @@ from django.core.mail import send_mail
 from .serializers import RatingSerializer
 
 User = get_user_model()
+
+
+def get_image_url(image_field, request):
+    """Helper function to get absolute image URLs."""
+    return request.build_absolute_uri(image_field.url) if image_field else None
 
 
 # Posting a ride
@@ -63,6 +68,10 @@ def find_ride(request):
     # Add full name of the user manually
     for index, ride in enumerate(rides):
         ride_data[index]["rider_name"] = ride.user.get_full_name()
+        ride_data[index]["rider_profile"] = get_image_url(
+            ride.user.profile_picture, request
+        )
+        ride_data[index]["rider_rating"] = ride.user.total_rating
 
     return Response(
         {"total": rides.count(), "rides": ride_data},
@@ -84,6 +93,10 @@ def all_rides(request):
     # Add full name of the user manually
     for index, ride in enumerate(rides):
         ride_data[index]["rider_name"] = ride.user.get_full_name()
+        ride_data[index]["rider_profile"] = get_image_url(
+            ride.user.profile_picture, request
+        )
+        ride_data[index]["rider_rating"] = ride.user.total_rating
 
     return Response(
         {"total": rides.count(), "rides": ride_data},
@@ -106,12 +119,18 @@ def user_rides(request):
 
             # Get the list of booker user IDs
             booker_user_ids = accepted_bookings.values_list("booker_id", flat=True)
-            print(booker_user_ids)
+            booker_user_names = accepted_bookings.values_list(
+                "booker__username", flat=True
+            )
+            print(booker_user_names)
 
             # Add data to response
             serialized_ride["total_bookings"] = accepted_booking_count
             serialized_ride["booker_user_ids"] = list(
                 booker_user_ids
+            )  # Convert to list
+            serialized_ride["booker_user_names"] = list(
+                booker_user_names
             )  # Convert to list
 
         return Response(
@@ -564,3 +583,32 @@ def rate_ride(request, book_id):
                 status=status.HTTP_201_CREATED,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Show ride comments
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def ride_comments(request, ride_id):
+    ride = get_object_or_404(Available, id=ride_id, user=request.user)
+
+    ratings = Rating.objects.filter(
+        booking__ride=ride
+    )  # Selects all rating of the corresponding ride
+    print(ratings)
+    print(ratings[0].booking.booker)
+
+    response_data = [
+        {
+            "id": rate.id,
+            "rater_id": rate.booking.booker.id,
+            "rater": rate.booking.booker.get_full_name(),
+            "rater_username": rate.booking.booker.username,
+            "stars": rate.rating,
+            "comment": rate.comment,
+            "time": rate.rated_at,
+            "profile": get_image_url(rate.booking.booker.profile_picture, request),
+        }
+        for rate in ratings
+    ]
+
+    return Response(response_data, status=200)

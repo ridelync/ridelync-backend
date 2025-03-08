@@ -18,6 +18,7 @@ from .views import (
     verify_otp,
     send_emergency_email,
     rate_ride,
+    ride_comments,
 )
 
 urlpatterns = [
@@ -31,6 +32,7 @@ urlpatterns = [
     path("booked-rides/<int:book_id>/delete", delete_request, name="delete-request"),
     path("booked-rides/<int:book_id>/rate", rate_ride, name="rate-ride"),
     path("my-rides/<int:ride_id>", ride_requests, name="ride_requests"),
+    path("my-rides/<int:ride_id>/comments", ride_comments, name="ride_comments"),
     path("my-rides/<int:book_id>/accept/", accept_ride, name="ride-accepted"),
     path("my-rides/<int:book_id>/reject/", reject_ride, name="ride-rejected"),
     path("my-rides/<int:ride_id>/start/", start_journey, name="start-ride"),
@@ -39,4 +41,5 @@ urlpatterns = [
     path("my-rides/send-otp/", send_otp_to_booker, name="send-otp"),
     path("my-rides/verify-otp/", verify_otp, name="verify-otp"),
     path("emergency/", send_emergency_email, name="emergency-message"),
+
 ]

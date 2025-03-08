@@ -112,5 +112,4 @@ class Rating(models.Model):
             else:
                 # New rating, increase rating count
                 driver.update_rating(new_rating=self.rating, old_rating=None)
-                driver.rating_count += 1  # Increase rating count for new rating
                 driver.save()
