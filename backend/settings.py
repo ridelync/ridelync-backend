@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "cloudinary",
     "cloudinary_storage",
     "chat",
+    "ai",
 ]
 
 MIDDLEWARE = [
@@ -201,7 +202,7 @@ cloudinary.config(
     cloud_name=CLOUDINARY_STORAGE["CLOUD_NAME"],
     api_key=CLOUDINARY_STORAGE["API_KEY"],
     api_secret=CLOUDINARY_STORAGE["API_SECRET"],
-    secure=True
+    secure=True,
 )
 
 DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
@@ -212,4 +213,4 @@ EMAIL_HOST = "smtp.gmail.com"  # Gmail SMTP server
 EMAIL_PORT = 587  # TLS Port
 EMAIL_USE_TLS = True  # Enable Transport Layer Security
 EMAIL_HOST_USER = "ridelync00@gmail.com"  # Replace with your Gmail ID
-EMAIL_HOST_PASSWORD = "fufudbuijrnuptin"  # Use the App Password generated from Google
+EMAIL_HOST_PASSWORD = "rmplqbrlcrdimove"  # Use the App Password generated from Google

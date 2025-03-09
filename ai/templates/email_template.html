@@ -1,0 +1,60 @@
+<!-- templates/email_template.html -->
+<html>
+  <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333">
+    <div
+      style="
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      "
+    >
+      <h2 style="color: #4caf50">Hello {{ receiver_name }},</h2>
+
+      <p>
+        Great news! <b>{{ sender_name }}</b> is interested in sharing a ride
+        with you from <b>{{ start_loc }}</b> to <b>{{ end_loc }}</b>.
+      </p>
+
+      <p>By connecting with <b>{{ sender_name }}</b>, you can:</p>
+
+      <ul>
+        <li>Share travel costs and save money</li>
+        <li>Reduce traffic congestion and your carbon footprint</li>
+        <li>Enjoy a more social and enjoyable commute</li>
+        <li>Schedule rides that fit your timetable</li>
+      </ul>
+
+      <p>
+        If you're interested, you can reach out to
+        <b>{{ sender_name }}</b> directly or accept their ride request through
+        RideLync.
+      </p>
+
+      <div style="text-align: center; margin: 30px 0">
+        <a
+          href="{{ webapp_url }}"
+          style="
+            background-color: #4caf50;
+            color: white;
+            padding: 12px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+          "
+        >
+          View Ride Request
+        </a>
+      </div>
+
+      <p>
+        If you have any questions, simply reply to this email or call our
+        support team at 1-800-RIDELYNC.
+      </p>
+
+      <p>Happy carpooling!</p>
+      <p>The RideLync Team</p>
+    </div>
+  </body>
+</html>

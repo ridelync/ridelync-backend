@@ -25,6 +25,7 @@ urlpatterns = [
     path("api/accounts/", include("accounts.urls")),
     path("api/rides/", include("rides.urls")),
     path("api/chat/", include("chat.urls")),
+    path("api/ai/", include("ai.urls")),
 ]
 
 # Serve media files only in DEBUG mode
