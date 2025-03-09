@@ -10,6 +10,7 @@ from .serializers import UserSerializer
 import cloudinary
 import cloudinary.uploader
 import cloudinary.exceptions
+from rides.models import Rating
 
 User = get_user_model()
 
@@ -280,3 +281,59 @@ def user_list(request):
     users = User.objects.exclude(id=request.user.id)
     serializer = UserSerializer(users, many=True)
     return Response(serializer.data)
+
+# Show user reviews
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_user_reviews(request, user_id):
+    try:
+        # Get the user
+        user = User.objects.get(id=user_id)
+        
+        # Find all ratings for bookings where this user was the driver
+        driver_ratings = Rating.objects.filter(booking__ride__user=user)
+        
+        # Prepare the response
+        reviews = []
+        
+        for rating in driver_ratings:
+            booking = rating.booking
+            reviewer = booking.booker
+            ride = booking.ride
+            
+            review_data = {
+                'id': rating.id,
+                'rating': rating.rating,
+                'comment': rating.comment,
+                'rated_at': rating.rated_at,
+                'reviewer': {
+                    'id': reviewer.id,
+                    'username': reviewer.username,
+                    'first_name': reviewer.first_name,
+                    'last_name': reviewer.last_name,
+                    'profile_picture': reviewer.profile_picture.url if hasattr(reviewer, 'profile_picture') and reviewer.profile_picture else None,
+                },
+                'ride_details': {
+                    'from': ride.from_location,
+                    'to': ride.to_location,
+                    'date': ride.date,
+                }
+            }
+            
+            reviews.append(review_data)
+        
+        return Response({
+            'count': len(reviews),
+            'reviews': reviews
+        })
+        
+    except User.DoesNotExist:
+        return Response(
+            {'error': 'User not found.'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    except Exception as e:
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

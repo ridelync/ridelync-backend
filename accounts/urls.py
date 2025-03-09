@@ -10,6 +10,7 @@ from .views import (
     verify_otp,
     reset_password,
     user_list,
+    get_user_reviews,
 )
 
 urlpatterns = [
@@ -24,4 +25,5 @@ urlpatterns = [
     path("verify-otp/", verify_otp, name="verify-otp"),
     path("reset-password/", reset_password, name="reset-password"),
     path("users/", user_list, name="list-users"),
+    path("reviews/<int:user_id>/", get_user_reviews, name="user-reviews"),
 ]

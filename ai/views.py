@@ -11,15 +11,19 @@ from django.template.loader import render_to_string
 @api_view(["GET"])
 @permission_classes([AllowAny])  # Anyone can access this API
 def all_rides(request):
+    # Get the authenticated user's email (if available)
+    user_email = request.user.email if request.user.is_authenticated else None
+
     with connection.cursor() as cursor:
-        # SQL Query with INNER JOIN
+        # SQL Query with INNER JOIN and condition to exclude rides for the authenticated user
         query = """
             SELECT lm.mapping_id, lm.vehicle_number, lm.detection_date, lm.start_loc, lm.end_loc,
                    od.name, od.contact_no, od.email
             FROM LOCATION_MAPPING lm
             INNER JOIN OWNER_DETAILS od ON lm.vehicle_number = od.vehicle_number
+            WHERE od.email != %s OR %s IS NULL
         """
-        cursor.execute(query)
+        cursor.execute(query, [user_email, user_email])
         rows = cursor.fetchall()
 
     # Formatting data
@@ -41,7 +45,6 @@ def all_rides(request):
     return Response(
         {"total": len(ride_data), "rides": ride_data}, status=status.HTTP_200_OK
     )
-
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -103,3 +106,4 @@ def req_mail(request):
             {"status": "error", "message": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
+

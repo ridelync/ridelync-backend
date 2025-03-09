@@ -9,7 +9,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
-from .serializers import RatingSerializer
+from .serializers import RatingSerializer, RideDetailSerializer
 
 User = get_user_model()
 
@@ -612,3 +612,16 @@ def ride_comments(request, ride_id):
     ]
 
     return Response(response_data, status=200)
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def ride_details(request, ride_id):
+    try:
+        ride = Available.objects.get(id=ride_id)
+        serializer = RideDetailSerializer(ride)
+        return Response(serializer.data)
+    except Available.DoesNotExist:
+        return Response(
+            {"detail": "Ride not found"}, 
+            status=status.HTTP_404_NOT_FOUND
+        )

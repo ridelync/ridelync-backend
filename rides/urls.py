@@ -19,6 +19,7 @@ from .views import (
     send_emergency_email,
     rate_ride,
     ride_comments,
+    ride_details,
 )
 
 urlpatterns = [
@@ -41,5 +42,5 @@ urlpatterns = [
     path("my-rides/send-otp/", send_otp_to_booker, name="send-otp"),
     path("my-rides/verify-otp/", verify_otp, name="verify-otp"),
     path("emergency/", send_emergency_email, name="emergency-message"),
-
+    path("<int:ride_id>/", ride_details, name="ride-detail"),
 ]
