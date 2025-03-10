@@ -172,9 +172,8 @@ CORS_ALLOW_HEADERS = [
 CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://*.ngrok-free.app",
     "https://rideshare-wheat.vercel.app",
-]  # Allow all ngrok URLs
+]
 
 
 REST_FRAMEWORK = {
@@ -213,4 +212,4 @@ EMAIL_HOST = "smtp.gmail.com"  # Gmail SMTP server
 EMAIL_PORT = 587  # TLS Port
 EMAIL_USE_TLS = True  # Enable Transport Layer Security
 EMAIL_HOST_USER = "ridelync00@gmail.com"  # Replace with your Gmail ID
-EMAIL_HOST_PASSWORD = "rmplqbrlcrdimove"  # Use the App Password generated from Google
+EMAIL_HOST_PASSWORD = "mgahjsivouhaeulj"  # Use the App Password generated from Google
